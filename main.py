@@ -50,10 +50,16 @@ def generate_api_key():
 def index():
     return render_template("index.html")
 
+@app.route("/config")
+def get_publishable_key():
+    stripe_config = {"publicKey": stripe_keys["publishable_key"]}
+    return jsonify(stripe_config)
+
 
 @app.route('/hello')
 def hello():
     return 'Hello, World!'
+
 
 
 @app.route("/create-checkout-session") 
@@ -75,10 +81,14 @@ def create_checkout_session():
             mode="subscription",
             line_items=[
 			{
-				"price": "price_1MoyHJJaawNKBfql8qzS71Ez",
+				"price": config['STRIPE_PRODUCT_ID']['ID'] ,
 			},
             ]
         )
+
+        #TODO generate api key here, and store in db! -> must have customerID, nd then we are good (can then store it in db with the api key)
+        # -> can then send api key in successurl, and in the success.html you can grab the key from the url, and then display it
+
 
         return jsonify({"sessionId": checkout_session["id"]})
     except Exception as e:
@@ -106,7 +116,6 @@ def success():
     print("\n\n")
 
     customers.insert_one({"customerId": customer.id, "hashedAPIKey": hashedAPIKey, "itemId" : itemId, "active": True, "subscriptionId" : subscriptionId })
-
     return render_template("success.html", name = customer.name, APIKey = APIKey)
 
 
