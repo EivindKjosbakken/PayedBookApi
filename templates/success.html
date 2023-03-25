@@ -1,0 +1,16 @@
+<!-- templates/success.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section">
+    <div class="container">
+      <p>Your payment succeeded.</p>
+      <p>Thank you for your order {{name}}</p>
+      <p></p>
+      <b>Your API key is: {{APIKey}}</b>
+      
+      <p>(store this somewhere, cannot be found again after this page is closed)</p>
+    </div>
+  </section>
+{% endblock %}
