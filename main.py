@@ -9,6 +9,10 @@ import stripe
 import hashlib
 import secrets
 import requests
+import traceback
+
+#import utility funcs
+from dbUtilityFuncs import getPlotFromIsbn
 
 #Some code from : https://testdriven.io/blog/flask-stripe-tutorial/
 
@@ -22,9 +26,14 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # make database
 config = configparser.ConfigParser()
 config.read(os.path.abspath(os.path.join("./.ini")))
-mongo_client = pymongo.MongoClient(config['LOCAL']['DB_URI'])
+# mongo_client = pymongo.MongoClient(config['LOCAL']['DB_URI'])
+mongo_client = pymongo.MongoClient(config['DEV']['DB_URI'])
+
 payedBookAPIDB = mongo_client["payedBookAPIDB"]
 customers = payedBookAPIDB["customers"]
+
+book_plots_DB = mongo_client["book_plots_DB"]
+book_plots = book_plots_DB["book_plots"]
 
 
 
@@ -41,7 +50,7 @@ def generate_hash(string):
     return hashlib.md5(string.encode()).hexdigest()
 
 def generate_api_key():
-    APIKey = secrets.token_urlsafe(16)
+    APIKey = secrets.token_urlsafe(24)
     hashedAPIKey = generate_hash(APIKey)
     return (APIKey, hashedAPIKey)
 
@@ -59,6 +68,18 @@ def get_publishable_key():
 @app.route('/hello')
 def hello():
     return 'Hello, World!'
+
+@app.route('/test_db', methods=["POST"])
+def test_db():
+    data = request.json
+    customerId = data["customerId"]
+    try:
+        customers.insert_one({"customerId":customerId, "hashedAPIKey": "TESTING", "itemId" : "TESTING", "active": "TESTING", "subscriptionId" : "TESTING" })
+        return 'DB ACCESS!', 200
+    except:
+        print("adding did not work")
+        return ("Failed db access",traceback.print_exc()), 400
+
 
 
 
@@ -85,10 +106,6 @@ def create_checkout_session():
 			},
             ]
         )
-
-        #TODO generate api key here, and store in db! -> must have customerID, nd then we are good (can then store it in db with the api key)
-        # -> can then send api key in successurl, and in the success.html you can grab the key from the url, and then display it
-
 
         return jsonify({"sessionId": checkout_session["id"]})
     except Exception as e:
@@ -175,7 +192,7 @@ def getCustomerUsage():
         return "Customer ID not found, check your API key", 400
     invoice = stripe.Invoice.upcoming(customer = customerId)
     return {"invoice": invoice}
-    #NOTE this method may not find customer if customer is made in a different stripe listening sessioN!
+    #NOTE this method may not find customer if customer is made in a different stripe listening session!
 
 @app.route("/cancel_subscription")
 @cross_origin()
@@ -216,6 +233,47 @@ def get_book_plots():
     if (APIKey is None):
         return {"status":"not allowed"}, 403
     
+    data = request.json
+    isbn = data.get("isbn", None)
+    if (isbn is None):
+        return {"status":"isbn not given, give in isbn with, {'isbn' : 'your isbn here'}  . You have not been billed for this"}
+    
+    hashedAPIKey = generate_hash(APIKey)
+    
+    customer = customers.find_one({"hashedAPIKey" : hashedAPIKey})
+    if (customer is None):
+        return {"status": "Customer not found"}, 400
+    
+    customerId, itemId, active = customer.get("customerId", ""), customer.get("itemId", ""), customer.get("active", False)
+    if (customerId == "" or itemId == "" or active == False):
+        return {"status": "Not valid customerId or itemId, or non active user"}, 400
+    
+
+    try:
+        #TODO grab book from isbn, remember to comment out record thing if you are testing local
+        plot = getPlotFromIsbn(isbn, book_plots=book_plots)
+
+        #TODO make sure to uncomment this in production as well as return actual record 
+        # record = stripe.SubscriptionItem.create_usage_record(itemId, quantity=1, timestamp = "now", action="increment")
+        return {"status":"plot retrieved", "record": "ADD RECORD HERE", "plot":plot} 
+    except:
+        return {"status": "could not get the plot for the book, you have not been billed for this"}, 400
+    
+
+
+    return {"status": "congrats, you accessed a payed endpoint", "record": record}, 200
+
+
+
+#NOTE just for testing endpoint without needing a stripe account
+@app.route(f"/get_book_plots_test", methods=["POST"])
+@cross_origin()
+def get_book_plots_test():
+    APIKey = request.headers.get('X-API-KEY')
+
+    if (APIKey is None):
+        return {"status":"not allowed"}, 403
+    
     hashedAPIKey = generate_hash(APIKey)
     
     customer = customers.find_one({"hashedAPIKey" : hashedAPIKey})
@@ -227,10 +285,7 @@ def get_book_plots():
     if (customerId == "" or itemId == "" or active == False):
         return {"status": "Not valid customerId or itemId, or non active user"}, 400
     
-    record = stripe.SubscriptionItem.create_usage_record(itemId, quantity=1, timestamp = "now", action="increment")
+    # record = stripe.SubscriptionItem.create_usage_record(itemId, quantity=1, timestamp = "now", action="increment")
 
-    return {"status": "congrats, you accessed a payed endpoint", "record": record}, 200
-
-
-
+    return {"status": "congrats, you accessed a payed endpoint", "record": "record"}, 200
 

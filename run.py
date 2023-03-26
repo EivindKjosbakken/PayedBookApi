@@ -8,8 +8,12 @@ from main import app as flask_app_1
 
 def create_and_run_app():
     application = DispatcherMiddleware(flask_app_1)
-    run_simple('localhost', 5000, application, use_reloader=True, use_debugger=True, use_evalex=True)
 
+    #TODO if you want to run on https
+    # run_simple('0.0.0.0', 5000, application, use_reloader=True, use_debugger=True, use_evalex=True, ssl_context='adhoc')
+
+    #Run on http
+    run_simple('0.0.0.0', 5000, application, use_reloader=True, use_debugger=True, use_evalex=True)
 
 if __name__ == "__main__":
 	app = create_and_run_app()

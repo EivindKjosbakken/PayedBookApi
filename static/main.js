@@ -1,4 +1,4 @@
-// Get Stripe publishable key
+// static/main.js
 fetch("/config")
 	.then((result) => {
 		return result.json();

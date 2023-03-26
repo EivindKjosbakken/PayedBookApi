@@ -1,0 +1,17 @@
+version: "3.10.4"
+services:
+  management_service:
+    image: Kjosbakken/payed_book_api:test_image
+    ports:
+      - 5000:5000
+    extra_hosts:
+      mongoservice: 172.17.0.1
+    networks:
+      - backend
+    links:
+      - payed_book_api
+
+    
+networks:
+  backend:
+    driver: bridge
