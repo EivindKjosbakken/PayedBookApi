@@ -7,3 +7,14 @@ To run:
 3. run Flask with "python run.py"
 
 And you are good to go!
+
+
+To use API:
+
+The API has 3 endpoints you can currently access, all require your API Key which you can get from the checkout with stripe (link coming soon). To send with API Key, add the following to your header: key is "X-API-KEY"  , value is the API key you are given after checkout  
+
+1. /get_book_plots   . Send to this endpoint with a body: {"isbn" : "isbn you want to get plot for"} as well 
+2. /usage will show you how much you have spent (automatically checks using your API Key)
+3. /cancel_subscription will allow you to cancel your subscription. Note, you will still be charged for the usage of your API up until cancellation
+
+Link to access endpoints are coming soon!
