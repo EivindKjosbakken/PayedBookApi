@@ -38,12 +38,12 @@ def deleteEmptyPlotsFromDB():
 
 
 #ADDED FILES:
-files = ["../data/NPZ/titleAndEncodedSummariesStrings1.npz","../data/NPZ/titleAndEncodedSummariesStrings2.npz", 
-         "../data/NPZ/titleAndEncodedSummariesStrings3.npz", "../data/NPZ/titleAndEncodedSummariesStrings4.npz",
-         "../data/NPZ/titleAndEncodedSummariesStrings5.npz", "../data/NPZ/titleAndEncodedSummariesStrings6.npz",
-         "../data/NPZ/titleAndEncodedSummariesStrings7.npz","../data/NPZ/titleAndEncodedSummariesStrings8.npz", 
-         "../data/NPZ/titleAndEncodedSummariesStrings9.npz", "../data/NPZ/titleAndEncodedSummariesStrings10.npz",
-         "../data/NPZ/titleAndEncodedSummariesStrings11.npz"]
+files = ["../data/titleAndEncodedSummariesStrings1.npz","../data/titleAndEncodedSummariesStrings2.npz", 
+         "../data/titleAndEncodedSummariesStrings3.npz", "../data/titleAndEncodedSummariesStrings4.npz",
+         "../data/titleAndEncodedSummariesStrings5.npz", "../data/titleAndEncodedSummariesStrings6.npz",
+         "../data/titleAndEncodedSummariesStrings7.npz","../data/titleAndEncodedSummariesStrings8.npz", 
+         "../data/titleAndEncodedSummariesStrings9.npz", "../data/titleAndEncodedSummariesStrings10.npz",
+         "../data/titleAndEncodedSummariesStrings11.npz"]
 
 #NON ADDED FILES:
 nonAddedFiles = []
